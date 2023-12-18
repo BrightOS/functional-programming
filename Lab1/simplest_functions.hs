@@ -17,30 +17,32 @@ module Main where
     minMy :: Ord a => a -> a -> a
     minMy a b = if a < b then a else b
     
-    maximumMy :: Ord b => [b] -> b
-    maximumMy [] = error "maximumMy empty list"
-    maximumMy xs = foldl1 max xs
-    
-    minimumMy :: Ord b => [b] -> b
-    minimumMy [] = error "minimumMy empty list"
-    minimumMy xs = foldl1 min xs
+    maximumMy :: Ord a => [a] -> a
+    maximumMy [x] = x 
+    maximumMy (x:xs) = maxMy x (maximumMy xs)
+
+    minimumMy :: Ord a => [a] -> a
+    minimumMy [x] = x
+    minimumMy (x:xs) = minMy x (minimumMy xs)
     
     evenMy :: Integral a => a -> Bool
     evenMy x = x `mod` 2 == 0
     
     oddMy :: Integral a => a -> Bool
     oddMy x = x `mod` 2 /= 0
-    
+
     gcdMy :: Integral t => t -> t -> t -- Наибольший общий делитель
-    gcdMy a b = if b == 0 then a else gcdMy b (mod a b)
+    gcdMy a b 
+        | b == 0 = a 
+        | otherwise = gcdMy b (mod a b)
 
     lcmMy :: Integral a => a -> a -> a -- Наименьшее общее кратное
     lcmMy a b = abs (a * b) `div` gcdMy a b
 
     powerMy :: (Eq t1, Num t1, Num t2) => t2 -> t1 -> t2
-    powerMy base exp = if exp == 0 then 1 else base * powerMy base (exp - 1)
-
-    -- Рекурсивные функции
+    powerMy base exp
+        | exp == 0 = 1
+        | otherwise = base * powerMy base (exp - 1)
 
     factMy :: Integer -> Integer
     factMy 0 = 1
@@ -90,27 +92,38 @@ module Main where
     concatMy :: [a] -> [a] -> [a]
     concatMy xs ys = xs ++ ys
     
+    -- Берёт первые n элементов
     takeMy :: (Ord t, Num t) => t -> [a] -> [a]
-    takeMy n xs = if n <= 0 then [] else headMy xs : takeMy (n - 1) (tailMy xs)
+    takeMy n xs 
+        | n <= 0 = []
+        | otherwise = headMy xs : takeMy (n - 1) (tailMy xs)
     
+    -- Удаляет первые n элементов
     dropMy :: (Ord t, Num t) => t -> [a] -> [a]
-    dropMy n xs = if n <= 0 then xs else dropMy (n - 1) (tailMy xs)
+    dropMy n xs
+        | n <= 0 = xs
+        | otherwise = dropMy (n - 1) (tailMy xs)
     
-    reverseMy :: Foldable t => t a -> [a]
-    reverseMy xs = foldl (\acc x -> x : acc) [] xs
+    reverseMy :: [a] -> [a]
+    reverseMy [] = []
+    reverseMy (x:xs) = reverseMy xs ++ [x]
     
     elemMy :: Eq a => a -> [a] -> Bool
     elemMy x [] = False
     elemMy x (y:ys) = (x == y) || elemMy x ys
     
-    replicateMy :: (Ord t, Num t) => t -> a -> [a]
-    replicateMy n x = takeMy n (repeat x)
+    -- Повторить n раз значение x
+    replicateMy :: Int -> a -> [a]
+    replicateMy 0 _ = []
+    replicateMy n x
+        | n == 0 = []
+        | otherwise = x : replicateMy (n-1) x 
 
-    -- Дополнительные списочные операции
     lookupMy :: Eq a => a -> b -> [(a, b)] -> b
-    lookupMy key defaultValue [] = defaultValue
-    lookupMy key defaultValue ((k, v):kvs) =
-        if key == k then v else lookupMy key defaultValue kvs
+    lookupMy xa xb [] = xb
+    lookupMy xa xb ((k, v):kvs)
+        | xa == k = v
+        | otherwise = lookupMy xa xb kvs
 
     substrMy :: [a] -> Int -> Int -> [a]
     substrMy xs start end = takeMy (end - start + 1) (dropMy start xs)
@@ -123,27 +136,32 @@ module Main where
         where
             len = length find  -- длина первого списка
 
-    elemIndicesMy :: Eq a => a -> [a] -> [Int]
-    elemIndicesMy x xs = [i | (e, i) <- zip xs [0..], e == x]
+    --Находит, под какими индексами в списке встречается заданный элемент.
+    elemIndices :: Eq a => a -> [a] -> [Int]
+    elemIndices _ [] = [] 
+    elemIndices y xs = elemIndicesTwo y xs 0
+        where
+            elemIndicesTwo :: Eq a => a -> [a] -> Int -> [Int]
+            elemIndicesTwo _ [] _ = [] 
+            elemIndicesTwo y (x:xs) index
+                | y == x = index : elemIndicesTwo y xs (index + 1) 
+                | otherwise = elemIndicesTwo y xs (index + 1)
 
     --Находит все вхождения первого списка во второй и возвращает список номеров элементов, с которых эти вхождения начинаются 
     strPosMy :: Eq a => [a] -> [a] -> [Int]
-    strPosMy _ [] = []  -- если второй список пустой, возвращаем пустой список индексов
-    strPosMy first second = strPosTwo first second 0  -- вызываем вспомогательную функцию с начальным индексом 0
-
-    -- Вспомогательная рекурсивная функция для поиска индексов начала вхождений списка
-    strPosTwo :: Eq a => [a] -> [a] -> Int -> [Int]
-    strPosTwo first second index
-        | length second < length first = []  -- если длина второго списка меньше длины первого, нет смысла продолжать поиск
-        | take (length first) second == first = index : strPosTwo first (drop 1 second) (index + 1)  -- если найдено вхождение, добавляем индекс в результат и продолжаем поиск
-        | otherwise = strPosTwo first (drop 1 second) (index + 1)  -- если вхождение не найдено, переходим к следующему элементу
-
+    strPosMy _ [] = []
+    strPosMy first second = strPosTwo first second 0
+        where
+            strPosTwo :: Eq a => [a] -> [a] -> Int -> [Int]
+            strPosTwo first second index
+                | length second < length first = []  -- если длина второго списка меньше длины первого, нет смысла продолжать поиск
+                | take (length first) second == first = index : strPosTwo first (drop 1 second) (index + 1)  -- если найдено вхождение, добавляем индекс в результат и продолжаем поиск
+                | otherwise = strPosTwo first (drop 1 second) (index + 1)  -- если вхождение не найдено, переходим к следующему элементу
 
     strRotateMy :: [a] -> Int -> [a]
     strRotateMy [] x = []
     strRotateMy xs 0 = xs
     strRotateMy xs n = strRotateMy (last xs : init xs) (n-1)
-
 
     unevenHandWritingMy :: String -> String
     unevenHandWritingMy [] = []
@@ -176,8 +194,28 @@ module Main where
         let andMyTest = andMy [True, True, False]
         let orMyTest = orMy [True, False, False]
 
-        let strPosMyTest = strPosMy [1] [1, 2, 1]
+        let headMyTest = headMy [1, 2, 3]
+        let tailMyTest = tailMy [1, 2, 3]
+        let lastMyTest = lastMy [1, 2, 3]
+        let initMyTest = initMy [1, 2, 3]
+        let lengthMyTest = lengthMy [1, 2, 3]
+        let indexMyTest = indexMy [1, 2, 3] 2
+        let concatMyTest = concatMy [1, 2] [3]
+        let takeMyTest = takeMy 1 [1, 2, 3]
+        let dropMyTest = dropMy 1 [1, 2, 3]
+        let reverseMyTest = reverseMy [1, 2, 3]
+        let elemMyTest = elemMy 1 [1, 2, 3]
+        let replicateMyTest = replicateMy 1 'a'
 
+        let lookupMyTest = lookupMy 1 2 [(3, 2), (4, 3), (1, 2)]
+        let substrMyTest = substrMy "Amogus" 2 5
+        let strReplaceMyTest = strReplaceMy "Amogus" "Amog" "sus"
+        let elemIndicesTest = elemIndices 2 [2, 3, 2]
+        let strPosMyTest = strPosMy [1, 2] [1, 2, 3, 1, 2]
+        let strRotateMyTest = strRotateMy [1, 2, 3, 4, 5, 6] 2
+        let unevenHandWritingMyTest = unevenHandWritingMy "my name is walter white"
+
+        print "simplest"
         print sumMyTest
         print productMyTest
         print maxMyTest
@@ -190,11 +228,35 @@ module Main where
         print lcmMyTest
         print powerMyTest
 
+        print "recursive"
         print factorialOf5
         print fibonacciOf8
         print fibonacciOf8'
-        print strPosMyTest
 
+        print "logical"
         print andMyTest
         print orMyTest
+
+        print "lists"
+        print headMyTest
+        print tailMyTest
+        print lastMyTest
+        print initMyTest
+        print lengthMyTest
+        print indexMyTest
+        print concatMyTest
+        print takeMyTest
+        print dropMyTest
+        print reverseMyTest
+        print elemMyTest
+        print replicateMyTest
+
+        print "lists 2"
+
+        print lookupMyTest
+        print substrMyTest
+        print strReplaceMyTest
+        print elemIndicesTest
         print strPosMyTest
+        print strRotateMyTest
+        print unevenHandWritingMyTest
