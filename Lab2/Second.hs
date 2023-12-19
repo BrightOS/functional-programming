@@ -2,6 +2,7 @@
 module Second where
 
     import Data.Char
+    import Data.List (sortOn, insert)
 
     main :: IO ()
 
@@ -118,21 +119,29 @@ module Second where
         | elem x ys = x : intersectMy xs ys
         | otherwise = intersectMy xs ys
 
+    -- Нахождение булеана множества
+    powersetMy :: [a] -> [[a]]
+    powersetMy [] = [[]]
+    powersetMy (x:xs) = powersetMy xs ++ map (x:) (powersetMy xs)
+
+    -- Нахождение множества разбиений
+    complementsMy :: [a] -> [([a], [a])]
+    complementsMy [] = [([], [])]
+    complementsMy (x:xs) = concatMap (\(a, b) -> [(x:a, b), (a, x:b)]) (complementsMy xs)
+
     sortMy :: Ord a => [a] -> [a]
     sortMy [] = []
     sortMy (x:xs) = insert x (sortMy xs)
 
     countCharsMy :: String -> [(Char, Int)]
-    countCharsMy xs = sortByFrequencyCount $ map (\x -> (head x, length x)) $ group $ sort xs
+    countCharsMy str = sortOn (\(_, count) -> negate count) $ countCharsHelper str
         where
-            sortByFrequencyCount = sortBy (flip (on compare snd)) where
-            on f g a b = f (g a) (g b)
-
-    quickSortMy :: (Ord a) => [a] -> [a]
-    quickSortMy [] = []
-    quickSortMy (x:xs) = quickSortMy [a | a <- xs, a < x]
-        ++ [x] ++
-        quickSortMy [b | b <- xs, b >= x]
+            countCharsHelper :: String -> [(Char, Int)]
+            countCharsHelper [] = []
+            countCharsHelper (x:xs) = (x, count) : countCharsHelper rest
+                where
+                    count = 1 + length (filter (== x) xs)
+                    rest = filter (/= x) xs
 
     main = do
         let digitToIntMyTest = digitToIntMy '4'
@@ -152,9 +161,11 @@ module Second where
         let differenceMyTest = (\\\) [1, 4, 3, 5, 2] [1, 4, 2]
         let intersectMyTest = intersectMy [1, 2, 4, 3] [2, 1]
 
+        let powersetMyTest = powersetMy [1, 2, 3, 4, 5]
+        let complementsMyTest = complementsMy [1, 2, 3, 4, 5]
+
         let sortMyTest = sortMy [1, 4, 2, 6, 5, 9]
         let countCharsMyTest = countCharsMy "whatthehell"
-        let quickSortMyTest = quickSortMy [1, 4, 2, 6, 5, 9]
 
         print digitToIntMyTest
         print intToDigitMyTest
@@ -168,3 +179,7 @@ module Second where
         print unionMyTest
         print differenceMyTest
         print intersectMyTest
+        print powersetMyTest
+        print complementsMyTest
+        print sortMyTest
+        print countCharsMyTest
