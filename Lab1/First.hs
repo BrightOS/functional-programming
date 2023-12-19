@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC #-}
-module Main where
+module First where
     import Data.Char (toUpper, toLower, isLower, isUpper)
     main :: IO ()
 
@@ -131,10 +131,10 @@ module Main where
     strReplaceMy :: Eq a => [a] -> [a] -> [a] -> [a]
     strReplaceMy _ _ [] = []
     strReplaceMy find replace source
-        | take len source == find = replace ++ strReplaceMy find replace (drop len source)  -- если начало третьего списка равно первому списку, заменяем его на второй список
-        | otherwise = head source : strReplaceMy find replace (tail source)  -- иначе переходим к следующему элементу в третьем списке
-        where
-            len = length find  -- длина первого списка
+        | take len source == find = replace ++ strReplaceMy find replace (drop len source)
+        | otherwise = head source : strReplaceMy find replace (drop 1 source)
+            where
+                len = length find
 
     --Находит, под какими индексами в списке встречается заданный элемент.
     elemIndices :: Eq a => a -> [a] -> [Int]
@@ -154,9 +154,9 @@ module Main where
         where
             strPosTwo :: Eq a => [a] -> [a] -> Int -> [Int]
             strPosTwo first second index
-                | length second < length first = []  -- если длина второго списка меньше длины первого, нет смысла продолжать поиск
-                | take (length first) second == first = index : strPosTwo first (drop 1 second) (index + 1)  -- если найдено вхождение, добавляем индекс в результат и продолжаем поиск
-                | otherwise = strPosTwo first (drop 1 second) (index + 1)  -- если вхождение не найдено, переходим к следующему элементу
+                | length second < length first = []
+                | take (length first) second == first = index : strPosTwo first (drop 1 second) (index + 1)
+                | otherwise = strPosTwo first (drop 1 second) (index + 1)
 
     strRotateMy :: [a] -> Int -> [a]
     strRotateMy [] x = []
@@ -170,8 +170,8 @@ module Main where
             unevenHandWritingMyTwo :: String -> Int -> String
             unevenHandWritingMyTwo [] _ = []
             unevenHandWritingMyTwo (y:ys) n
-                | n `mod` 3 == 0 && isLower y = toUpper y : unevenHandWritingMyTwo ys (n+1)
-                | n `mod` 3 == 0 && isUpper y = toLower y : unevenHandWritingMyTwo ys (n+1)
+                | mod n 3 == 0 && isLower y = toUpper y : unevenHandWritingMyTwo ys (n+1)
+                | mod n 3 == 0 && isUpper y = toLower y : unevenHandWritingMyTwo ys (n+1)
                 | otherwise = y : unevenHandWritingMyTwo ys (n+1)
 
     main = do
@@ -208,8 +208,8 @@ module Main where
         let replicateMyTest = replicateMy 1 'a'
 
         let lookupMyTest = lookupMy 1 2 [(3, 2), (4, 3), (1, 2)]
-        let substrMyTest = substrMy "Amogus" 2 5
-        let strReplaceMyTest = strReplaceMy "Amogus" "Amog" "sus"
+        let substrMyTest = substrMy "Amogus" 3 5
+        let strReplaceMyTest = strReplaceMy "Amog" "s" "This is a Amogus"
         let elemIndicesTest = elemIndices 2 [2, 3, 2]
         let strPosMyTest = strPosMy [1, 2] [1, 2, 3, 1, 2]
         let strRotateMyTest = strRotateMy [1, 2, 3, 4, 5, 6] 2
