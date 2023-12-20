@@ -78,7 +78,7 @@ module Lab3.Third where
             insert x [] = [x]
             insert x (y:ys)
                 | cmp x y == GT = y : insert x ys
-                | otherwise     = x : y : ys
+                | otherwise = x : y : ys
 
     -- Комбинирование функций с использованием бинарной функции
     on :: (b -> b -> c) -> (a -> b) -> a -> a -> c
@@ -94,7 +94,12 @@ module Lab3.Third where
 
     -- Сложение списков чисел "столбиком"
     sumEqMy :: [[Int]] -> [Int]
-    sumEqMy lists = foldr1 (zipWith (+)) lists
+    sumEqMy lists = foldl1 (zipWith (+)) (foldl1 (addZeros (maximumBy (length) lists)) lists)
+        where
+            addZeros :: Int -> [Integer] -> [Integer]
+            addZeros n xs
+                | length xs >= n = xs
+                | otherwise = xs ++ replicate (n - length xs) 0
 
     -- Применение функции к каждому элементу списка с накоплением состояния
     mapAccumLMy :: (acc -> x -> (acc, y)) -> acc -> [x] -> (acc, [y])
@@ -114,4 +119,5 @@ module Lab3.Third where
 
 
     main = do
-        print ""
+        let sumEqMyTest = sumEqMy [[1, 2, 3, 4, 5], [4, 5, 6, 7]]
+        print sumEqMyTest

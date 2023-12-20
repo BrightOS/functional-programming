@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
 module Second where
 
-    import Data.Char
+    import Data.Char ( ord, chr, isDigit )
     import Data.List (sortOn, insert)
 
     main :: IO ()
@@ -9,8 +9,8 @@ module Second where
     digitToIntMy :: Char -> Int
     digitToIntMy c
         | isDigit c = ord c - ord '0'
-        | c >= 'a' && c <= 'f' =  ord c - ord 'a' + 10
-        | c >= 'A' && c <= 'F' =  ord c - ord 'A' + 10
+        | c >= 'a' && c <= 'f' = ord c - ord 'a' + 10
+        | c >= 'A' && c <= 'F' = ord c - ord 'A' + 10
         | otherwise = error (c : " - Not a digit")
 
     intToDigitMy :: Int -> Char
@@ -84,9 +84,7 @@ module Second where
     -- Удаление дубликатов
     nubMy :: Ord a => [a] -> [a]
     nubMy [] = []
-    nubMy (x:xs)
-        | elem x xs = nubMy xs
-        | otherwise = x : nubMy xs
+    nubMy (x:xs) = x : nubMy (filter (/= x) xs)
 
     -- Удаляет первое вхождение
     deleteMy :: Eq a => a -> [a] -> [a]
@@ -134,11 +132,11 @@ module Second where
     sortMy (x:xs) = insert x (sortMy xs)
 
     countCharsMy :: String -> [(Char, Int)]
-    countCharsMy str = sortOn (\(_, count) -> negate count) $ countCharsHelper str
+    countCharsMy str = sortOn (\(_, count) -> negate count) (countChars' str)
         where
-            countCharsHelper :: String -> [(Char, Int)]
-            countCharsHelper [] = []
-            countCharsHelper (x:xs) = (x, count) : countCharsHelper rest
+            countChars' :: String -> [(Char, Int)]
+            countChars' [] = []
+            countChars' (x:xs) = (x, count) : countChars' rest
                 where
                     count = 1 + length (filter (== x) xs)
                     rest = filter (/= x) xs
@@ -156,6 +154,7 @@ module Second where
         let zipMyTest = zipMy [1, 2, 3] [4, 5, 6]
         let unzipMyTest = unzipMy [(1, 5), (2, 6), (3, 7), (4, 8)]
         let nubMyTest = nubMy [1, 1, 1, 1, 1, 2, 3, 2, 3]
+        let nubMyTest2 = take 10 (nubMy [1..])
         let deleteMyTest = deleteMy 2 [1, 2, 2, 3]
         let unionMyTest = unionMy [1, 5, 3] [4, 3, 2, 1]
         let differenceMyTest = (\\\) [1, 4, 3, 5, 2] [1, 4, 2]
@@ -175,6 +174,8 @@ module Second where
         print zipMyTest
         print unzipMyTest
         print nubMyTest
+        print "a"
+        print nubMyTest2
         print deleteMyTest
         print unionMyTest
         print differenceMyTest
