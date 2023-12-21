@@ -25,31 +25,31 @@ module Lab3.Third where
 
     -- Удаление согласных букв из строки
     removeConsonants :: String -> String
-    removeConsonants = filter (`notElem` "bcdfghjklmnpqrstvwxyz")
+    removeConsonants = filterMy (`notElem` "bcdfghjklmnpqrstvwxyz")
 
     -- Удаление цифр из строки
     removeDigits :: String -> String
-    removeDigits = filter (`notElem` "0123456789")
+    removeDigits = filterMy (`notElem` "0123456789")
 
     -- Получение строки из первых букв каждой строки в списке
     firstLetters :: [String] -> String
-    firstLetters = map head
+    firstLetters = mapMy head
 
     -- Получение списка из последних элементов подсписков
     lastElements :: [[a]] -> [a]
-    lastElements = map last
+    lastElements = mapMy last
 
     -- Получение списка из N-х элементов подсписков
     getNthElements :: [[a]] -> Int -> [a]
-    getNthElements lists n = map (!! n) lists
+    getNthElements lists n = mapMy (!! n) lists
 
     -- Обращение списка и его подсписков
     reverseAll :: [[a]] -> [[a]]
-    reverseAll = map reverse
+    reverseAll = mapMy reverse
 
     -- Условное применение функций к элементам списка
     mapIfMy :: (a -> Bool) -> (a -> b) -> (a -> b) -> [a] -> [b]
-    mapIfMy cond f1 f2 xs = map (\x -> if cond x then f1 x else f2 x) xs
+    mapIfMy cond f1 f2 xs = mapMy (\x -> if cond x then f1 x else f2 x) xs
 
     -- Последовательная композиция функций
     composeAllMy :: [a -> a] -> (a -> a)
@@ -94,9 +94,12 @@ module Lab3.Third where
 
     -- Сложение списков чисел "столбиком"
     sumEqMy :: [[Int]] -> [Int]
-    sumEqMy lists = foldl1 (zipWith (+)) (foldl1 (addZeros (maximumBy (length) lists)) lists)
+    sumEqMy lists = foldl1 (zipWith (+)) paddedLists
         where
-            addZeros :: Int -> [Integer] -> [Integer]
+            maxLen = maximum (map length lists)
+            paddedLists = map (addZeros maxLen) lists
+
+            addZeros :: Int -> [Int] -> [Int]
             addZeros n xs
                 | length xs >= n = xs
                 | otherwise = xs ++ replicate (n - length xs) 0
@@ -107,7 +110,7 @@ module Lab3.Third where
 
     -- Разделение списка функций на те, что возвращают True и False для заданного значения
     segregateFMy :: [a -> Bool] -> a -> ([a -> Bool], [a -> Bool])
-    segregateFMy fs x = partition (\f -> f x) fs
+    segregateFMy funcs value = (filter (\f -> f value) funcs, filter (\f -> not (f value)) funcs)
 
     -- Функция из списка [Integer] возвращает все возможные пары чисел, где первое число меньше второго
     integerPairs :: [Integer] -> [(Integer, Integer)]
@@ -119,5 +122,12 @@ module Lab3.Third where
 
 
     main = do
+        let lastElementsTest = lastElements [[1, 2], [3, 2], [3, 3]]
         let sumEqMyTest = sumEqMy [[1, 2, 3, 4, 5], [4, 5, 6, 7]]
+        let integerPairsTest = integerPairs [1, 2, 9, 3, 5]
+        let integerPairs'Test = integerPairs' [1, 2, 9, 3, 5]
+    
+        print lastElementsTest
         print sumEqMyTest
+        print integerPairsTest
+        print integerPairs'Test
