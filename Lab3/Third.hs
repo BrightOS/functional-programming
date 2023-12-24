@@ -122,11 +122,41 @@ module Lab3.Third where
 
 
     main = do
+        let mapTest = map (\x -> x * 2) [1, 2, 3]
+        let filterTest = filter (>0) [-1, 1]
+        let zipWithTest = zipWith (*) [1, 2, 3] [3, 2, 1]
+        let dotTest = (filter (\x -> x `mod` 2 == 0) . map (\x -> x * 2)) [-1, 1, 2, 3]
+        let dollarTest = filter (\x -> x `mod` 2 == 0) $ map (\x -> x * 2) [-1, 1, 2, 3]
+        let flipTest = flip (/) 1 2
+        let idTest = id "12314314"
+        let constTest = const 123 142
+        let concatMapTest = concatMap (\x -> [x * 2]) [1, 2, 3]
+
+        let foldlTest = foldl (/) 4 [2, 2]
+        let foldl1Test = foldl1 (/) [4, 2, 2]
+        let scanlTest = scanl (/) 4 [2, 2]
+        let scanl1Test = scanl1 (/) [4, 2, 2]
+
         let lastElementsTest = lastElements [[1, 2], [3, 2], [3, 3]]
         let sumEqMyTest = sumEqMy [[1, 2, 3, 4, 5], [4, 5, 6, 7]]
         let integerPairsTest = integerPairs [1, 2, 9, 3, 5]
         let integerPairs'Test = integerPairs' [1, 2, 9, 3, 5]
     
+        print mapTest
+        print filterTest
+        print zipWithTest
+        print dotTest
+        print dollarTest
+        print flipTest
+        print idTest
+        print constTest
+        print concatMapTest
+
+        print foldlTest
+        print foldl1Test
+        print scanlTest
+        print scanl1Test
+
         print lastElementsTest
         print sumEqMyTest
         print integerPairsTest

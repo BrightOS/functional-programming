@@ -1,5 +1,9 @@
 module Lab4.Fourth where
 
+    import Data.List
+    import Data.Function
+    import Data.Char
+
     main :: IO ()
     -- Реализация функции pseudoRandomMy с использованием линейного конгруэнтного метода
     pseudoRandomMy :: Integer -> [Integer]
@@ -67,7 +71,7 @@ module Lab4.Fourth where
 
     -- Функция для фильтрации строк, содержащих заданное слово
     filterByWord :: String -> String -> String
-    filterByWord word text = unlines $ filter (isInfixOf word) (lines text)
+    filterByWord word text = unlines $ filter (isInfixOfMy word) (lines text)
 
     -- Функция для разделения каждого из элементов элементом
     intersperseMy :: a -> [a] -> [a]
@@ -181,10 +185,12 @@ module Lab4.Fourth where
     fooReverse = concatMap (\group -> let (num, rep) = span isDigit group in replicate (length rep) (read num)) . group
 
     main = do
+        let powersOfTenTest = take 6 (powersOfTen)
         let iterateExample = take 5 (iterate (* 2) 1)
         let repeatExample = take 3 (repeat "Hello")
         let cycleExample = take 7 (cycle [1,2,3])
 
+        print powersOfTenTest
         print iterateExample
         print repeatExample
         print cycleExample
