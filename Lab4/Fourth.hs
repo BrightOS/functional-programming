@@ -89,9 +89,8 @@ module Lab4.Fourth where
     -- Функция explodeMy, но со списком сепараторов
     explodeBy :: (a -> Bool) -> [a] -> [([a], [a])]
     explodeBy _ [] = []
-    explodeBy p list =
-        let (first, rest) = span p list
-        in (first, dropWhile (not . p) rest) : explodeBy p (dropWhile (not . p) rest)
+    explodeBy f xs = (takeWhile (not . f) xs, takeWhile f (dropWhile (not . f) xs)):
+        explodeBy f (dropWhile f (dropWhile (not . f) xs))
 
     -- Функция с транспонированием строк и столбцов
     transposeMy :: [[a]] -> [[a]]
@@ -189,6 +188,9 @@ module Lab4.Fourth where
         let iterateExample = take 5 (iterate (* 2) 1)
         let repeatExample = take 3 (repeat "Hello")
         let cycleExample = take 7 (cycle [1,2,3])
+
+        let explodeByTest = explodeBy (`elem` ".!?") "Something happened... Finally!"
+        print explodeByTest
 
         print powersOfTenTest
         print iterateExample

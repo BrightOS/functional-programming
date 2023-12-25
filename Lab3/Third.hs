@@ -45,7 +45,7 @@ module Lab3.Third where
 
     -- Обращение списка и его подсписков
     reverseAll :: [[a]] -> [[a]]
-    reverseAll = mapMy reverse
+    reverseAll = reverse . mapMy reverse
 
     -- Условное применение функций к элементам списка
     mapIfMy :: (a -> Bool) -> (a -> b) -> (a -> b) -> [a] -> [b]
@@ -65,7 +65,7 @@ module Lab3.Third where
 
     -- Количество предикатов, возвращающих True для элемента
     countTruePredicates :: [a -> Bool] -> a -> Int
-    countTruePredicates preds x = length (filter (\p -> p x) preds)
+    countTruePredicates preds x = length $ filter (\p -> p x) preds
 
     -- Индексы элементов, удовлетворяющих условию
     findIndices :: (a -> Bool) -> [a] -> [Int]
@@ -85,28 +85,24 @@ module Lab3.Third where
     on fb fa x y = fb (fa x) (fa y)
 
     -- Фильтрация элементов, на которых все предикаты возвращают True
-    filterMapAndMy :: [a -> Bool] -> [a] -> [a]
-    filterMapAndMy preds xs = filter (\x -> all (\p -> p x) preds) xs
+    filterMapAllMy :: [a -> Bool] -> [a] -> [a]
+    filterMapAllMy preds xs = filter (\x -> allMy (\p -> p x) preds) xs
 
     -- Фильтрация элементов, на которых хотя бы один предикат возвращает True
-    filterMapOrMy :: [a -> Bool] -> [a] -> [a]
-    filterMapOrMy preds xs = filter (\x -> any (\p -> p x) preds) xs
+    filterMapAnyMy :: [a -> Bool] -> [a] -> [a]
+    filterMapAnyMy preds xs = filter (\x -> anyMy (\p -> p x) preds) xs
 
     -- Сложение списков чисел "столбиком"
     sumEqMy :: [[Int]] -> [Int]
     sumEqMy lists = foldl1 (zipWith (+)) paddedLists
         where
-            maxLen = maximum (map length lists)
+            maxLen = maximum (mapMy length lists)
             paddedLists = map (addZeros maxLen) lists
 
             addZeros :: Int -> [Int] -> [Int]
             addZeros n xs
                 | length xs >= n = xs
                 | otherwise = xs ++ replicate (n - length xs) 0
-
-    -- Применение функции к каждому элементу списка с накоплением состояния
-    mapAccumLMy :: (acc -> x -> (acc, y)) -> acc -> [x] -> (acc, [y])
-    mapAccumLMy f acc xs = foldl (\(acc', ys) x -> let (acc'', y) = f acc' x in (acc'', ys ++ [y])) (acc, []) xs
 
     -- Разделение списка функций на те, что возвращают True и False для заданного значения
     segregateFMy :: [a -> Bool] -> a -> ([a -> Bool], [a -> Bool])
@@ -122,8 +118,8 @@ module Lab3.Third where
 
 
     main = do
-        let mapTest = map (\x -> x * 2) [1, 2, 3]
-        let filterTest = filter (>0) [-1, 1]
+        let mapMyTest = mapMy (\x -> x * 2) [1, 2, 3]
+        let filterMyTest = filterMy (>0) [-1, 1]
         let zipWithTest = zipWith (*) [1, 2, 3] [3, 2, 1]
         let dotTest = (filter (\x -> x `mod` 2 == 0) . map (\x -> x * 2)) [-1, 1, 2, 3]
         let dollarTest = filter (\x -> x `mod` 2 == 0) $ map (\x -> x * 2) [-1, 1, 2, 3]
@@ -137,13 +133,15 @@ module Lab3.Third where
         let scanlTest = scanl (/) 4 [2, 2]
         let scanl1Test = scanl1 (/) [4, 2, 2]
 
+        let reverseAllTest = reverseAll [[1, 2, 3], [4, 2, 3]]
+
         let lastElementsTest = lastElements [[1, 2], [3, 2], [3, 3]]
         let sumEqMyTest = sumEqMy [[1, 2, 3, 4, 5], [4, 5, 6, 7]]
         let integerPairsTest = integerPairs [1, 2, 9, 3, 5]
         let integerPairs'Test = integerPairs' [1, 2, 9, 3, 5]
     
-        print mapTest
-        print filterTest
+        print mapMyTest
+        print filterMyTest
         print zipWithTest
         print dotTest
         print dollarTest
@@ -156,6 +154,11 @@ module Lab3.Third where
         print foldl1Test
         print scanlTest
         print scanl1Test
+
+        print reverseAllTest
+
+        let spanTest = span (3>) [1..10]
+        print spanTest
 
         print lastElementsTest
         print sumEqMyTest
