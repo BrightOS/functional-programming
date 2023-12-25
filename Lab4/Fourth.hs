@@ -3,8 +3,12 @@ module Lab4.Fourth where
     import Data.List
     import Data.Function
     import Data.Char
+    import System.IO
+    import System.Directory
+    import System.FilePath
 
     main :: IO ()
+
     -- Реализация функции pseudoRandomMy с использованием линейного конгруэнтного метода
     pseudoRandomMy :: Integer -> [Integer]
     pseudoRandomMy seed = iterate (\x -> (17 * x + 43) `mod` 100) seed
@@ -21,14 +25,14 @@ module Lab4.Fourth where
     sumEqualsProduct :: [Integer]
     sumEqualsProduct = filter (\n -> sumDigits n == productDigits n) [1..]
         where
-            sumDigits x = sum (map (\c -> read [c]) (show x))
-            productDigits x = product (map (\c -> read [c]) (show x))
+            sumDigits x = sum (map (\x -> read [x]) (show x))
+            productDigits x = product (map (\x -> read [x]) (show x))
 
     -- Реализация функции для бесконечного списка степеней двойки с нечетной суммой
     oddSumPowersOfTwo :: [Integer]
     oddSumPowersOfTwo = filter (\n -> odd (sumDigits n)) (iterate (* 2) 1)
         where
-            sumDigits x = sum (map (\c -> read [c]) (show x))
+            sumDigits x = sum (map (\x -> read [x]) (show x))
 
     -- Реализация функции для бесконечного списка подсписков чисел
     powerLists :: [[Integer]]
@@ -40,16 +44,16 @@ module Lab4.Fourth where
         where
             go :: String -> [Char] -> Bool
             go [] stack = null stack
-            go (c:cs) stack
-                | isOpeningBracket c = go cs (c:stack)
-                | isClosingBracket c = not (null stack) && matchBracket (head stack) c && go cs (tail stack)
-                | otherwise = go cs stack
+            go (x:xs) stack
+                | isOpeningBracket x = go xs (x:stack)
+                | isClosingBracket x = not (null stack) && matchBracket (head stack) x && go xs (drop 1 stack)
+                | otherwise = go xs stack
 
             isOpeningBracket :: Char -> Bool
-            isOpeningBracket c = c `elem` "({["
+            isOpeningBracket x = x `elem` "({["
 
             isClosingBracket :: Char -> Bool
-            isClosingBracket c = c `elem` ")}]"
+            isClosingBracket x = x `elem` ")}]"
 
             matchBracket :: Char -> Char -> Bool
             matchBracket '(' ')' = True
@@ -96,7 +100,7 @@ module Lab4.Fourth where
     transposeMy :: [[a]] -> [[a]]
     transposeMy [] = []
     transposeMy ([]:_) = []
-    transposeMy matrix = map head matrix : transposeMy (map tail matrix)
+    transposeMy matrix = map head matrix : transposeMy (map (drop 1) matrix)
 
     -- Функция для всевозможных перестановок
     permutationsMy :: [a] -> [[a]]
@@ -143,7 +147,7 @@ module Lab4.Fourth where
 
     -- Проверка на суффикс
     isSuffixOfMy :: Eq a => [a] -> [a] -> Bool
-    isSuffixOfMy xs ys = reverse xs `isPrefixOfMy` reverse ys
+    isSuffixOfMy xs ys = (reverse xs) `isPrefixOfMy` (reverse ys)
 
     -- Проверка на инфикс
     isInfixOfMy :: Eq a => [a] -> [a] -> Bool
@@ -167,23 +171,22 @@ module Lab4.Fourth where
     diffMy :: [Int] -> [Int]
     diffMy xs = zipWith (-) (tail xs) xs
 
-    -- Функция для преобразования строки с числами и конструкциями "N*K"
-    -- в строку с повторением числа N K раз
-    foo :: String -> String
-    foo = concatMap processToken . words
-        where
-            processToken :: String -> String
-            processToken token =
-                case break (== '*') token of
-                    (num, '*' : rep) -> replicate (read rep) (read num) ++ " "
-                    (num, "") -> num ++ " "
-                    _ -> error "Invalid token"
-
-    -- Обратная функция к foo, используя group
-    fooReverse :: String -> String
-    fooReverse = concatMap (\group -> let (num, rep) = span isDigit group in replicate (length rep) (read num)) . group
+    -- Список количества чисел меньше каждого из элементов
+    lessCountMy :: [Int] -> [Int]
+    lessCountMy xs = map (\x -> length $ filter (<x) xs) xs
 
     main = do
+        let currentDir = "e:\\funcprog"
+
+        contentsBrackets <- readFile (currentDir </> "brackets.txt")
+        putStrLn $ if checkBrackets contentsBrackets then "true" else "false"
+
+        input <- readFile (currentDir </> "input.txt")
+        writeFile (currentDir </> "wordcountoutput.txt") (show $ wordCount input)
+        writeFile (currentDir </> "lettercountoutput.txt") (show $ letterCount input)
+        writeFile (currentDir </> "uniquewordsoutput.txt") (show $ sortUniqueWords input)
+        writeFile (currentDir </> "filterbywordoutput.txt") (filterByWord "wow" input)
+
         let powersOfTenTest = take 6 (powersOfTen)
         let iterateExample = take 5 (iterate (* 2) 1)
         let repeatExample = take 3 (repeat "Hello")
@@ -191,6 +194,9 @@ module Lab4.Fourth where
 
         let explodeByTest = explodeBy (`elem` ".!?") "Something happened... Finally!"
         print explodeByTest
+
+        let transposeMyTest = transposeMy [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        print transposeMyTest
 
         print powersOfTenTest
         print iterateExample
