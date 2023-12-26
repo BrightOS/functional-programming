@@ -9,30 +9,27 @@ module Lab4.Fourth where
 
     main :: IO ()
 
+    iterateMy :: (a -> a) -> a -> [a]
+    iterateMy f x = x : iterateMy f (f x)
+
+    repeatMy :: a -> [a]
+    repeatMy x = x : repeatMy x
+    
+    cycleMy :: [a] -> [a]
+    cycleMy [] = []
+    cycleMy xs = xs ++ cycleMy xs
+
     -- Реализация функции pseudoRandomMy с использованием линейного конгруэнтного метода
     pseudoRandomMy :: Integer -> [Integer]
     pseudoRandomMy seed = iterate (\x -> (17 * x + 43) `mod` 100) seed
 
     -- Реализация функции для списка символов, представляющих натуральные числа
     naturalNumbers :: [Char]
-    naturalNumbers = concatMap (show . (+ 1)) [1..]
+    naturalNumbers = concatMap (show . (+ 1)) [0..]
 
     -- Реализация функции для списка символов, представляющих степени десятки
     powersOfTen :: [Char]
     powersOfTen = concatMap show (iterate (* 10) 1)
-
-    -- Реализация функции для бесконечного списка чисел, сумма которых равна их произведению
-    sumEqualsProduct :: [Integer]
-    sumEqualsProduct = filter (\n -> sumDigits n == productDigits n) [1..]
-        where
-            sumDigits x = sum (map (\x -> read [x]) (show x))
-            productDigits x = product (map (\x -> read [x]) (show x))
-
-    -- Реализация функции для бесконечного списка степеней двойки с нечетной суммой
-    oddSumPowersOfTwo :: [Integer]
-    oddSumPowersOfTwo = filter (\n -> odd (sumDigits n)) (iterate (* 2) 1)
-        where
-            sumDigits x = sum (map (\x -> read [x]) (show x))
 
     -- Реализация функции для бесконечного списка подсписков чисел
     powerLists :: [[Integer]]
@@ -62,18 +59,26 @@ module Lab4.Fourth where
             matchBracket _ _ = False
 
     -- Функция для подсчета уникальных слов и их количества в тексте
+    -- group: "abbacabba" -> ["a", "bb", "a", "c", "a", "bb", "a"]
+    -- flip для обратной сортировки
     wordCount :: String -> [(String, Int)]
-    wordCount text = sortBy (flip compare `on` snd) $ map (\group -> (head group, length group)) (group (sort (words text)))
+    wordCount text = sortBy (flip $ on compare snd) $ map (\group -> (head group, length group)) (group (sort (words text)))
 
     -- Функция для подсчета вхождений букв в тексте
     letterCount :: String -> [(Char, Int)]
-    letterCount text = sortBy (flip compare `on` snd) $ map (\group -> (head group, length group)) (group (sort (filter isLetter text)))
+    letterCount text = sortBy (flip $ on compare snd) $ map (\group -> (head group, length group)) (group (sort (filter isLetter text)))
+
+    -- 
+    onMy :: (b -> b -> c) -> (a -> b) -> a -> a -> c
+    onMy binary unary x y = binary (unary x) (unary y)
 
     -- Функция для сортировки уникальных слов в тексте без учета регистра
+    -- nub убирает дупликаты
     sortUniqueWords :: String -> [String]
     sortUniqueWords text = nub $ sort (map (map toLower) (words text))
 
     -- Функция для фильтрации строк, содержащих заданное слово
+    -- lines - разбиение на массив строк, unlines - reversed lines
     filterByWord :: String -> String -> String
     filterByWord word text = unlines $ filter (isInfixOfMy word) (lines text)
 
@@ -87,8 +92,9 @@ module Lab4.Fourth where
     explodeMy :: Eq a => a -> [a] -> [[a]]
     explodeMy _ [] = []
     explodeMy separator list =
-        let (first, rest) = span (/= separator) list
-        in first : explodeMy separator (dropWhile (== separator) rest)
+        first : explodeMy separator (dropWhile (== separator) rest)
+            where
+                (first, rest) = span (/= separator) list
 
     -- Функция explodeMy, но со списком сепараторов
     explodeBy :: (a -> Bool) -> [a] -> [([a], [a])]
@@ -129,7 +135,7 @@ module Lab4.Fourth where
     tailsMy [] = [[]]
     tailsMy list@(x:xs) = list : tailsMy xs
 
-    -- Функция для поиска всех префиксов
+    -- Функция для поиска всех инфиксов
     infixesMy :: [a] -> [[a]]
     infixesMy [] = [[]]
     infixesMy list = concatMap (initsMy . tail) (tailsMy list)
@@ -176,7 +182,7 @@ module Lab4.Fourth where
     lessCountMy xs = map (\x -> length $ filter (<x) xs) xs
 
     main = do
-        let currentDir = "e:\\funcprog"
+        let currentDir = "c:\\funcprog"
 
         contentsBrackets <- readFile (currentDir </> "brackets.txt")
         putStrLn $ if checkBrackets contentsBrackets then "true" else "false"
@@ -197,6 +203,11 @@ module Lab4.Fourth where
 
         let transposeMyTest = transposeMy [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         print transposeMyTest
+
+        let naturalNumbersTest = take 100 naturalNumbers
+        let naturalNumbersTest2 = drop 999 $ take 1000 naturalNumbers
+        print naturalNumbersTest
+        print naturalNumbersTest2
 
         print powersOfTenTest
         print iterateExample
